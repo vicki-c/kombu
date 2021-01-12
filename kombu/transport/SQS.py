@@ -102,6 +102,7 @@ Features
 
 
 import base64
+import binascii
 import socket
 import string
 import uuid
@@ -323,8 +324,9 @@ class Channel(virtual.Channel):
     def _message_to_python(self, message, queue_name, queue):
         try:
             body = base64.b64decode(message['Body'].encode())
-        except TypeError:
+        except (TypeError, binascii.Error):
             body = message['Body'].encode()
+            logger.warning('non-base64 body: %s', body)
         payload = loads(bytes_to_str(body))
         if queue_name in self._noack_queues:
             queue = self._new_queue(queue_name)
